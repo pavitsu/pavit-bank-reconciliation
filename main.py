@@ -1,6 +1,11 @@
+'''
+Jan 2019
+@author: Pavit Suwansiri
+'''
 import pandas as pd
 import numpy as np
 import warnings
+import GUI_class as gui
 warnings.filterwarnings('ignore')
 
 # Get csv data
@@ -36,13 +41,21 @@ def compare_list(list_word1, list_word2):
     return score
 
 def remove_nsf(df,colname):
+    """Remove Not Sufficient Find Cheque
+    then return it as dataframe
+    (no_nsf_cheque_df, has_nsf_cheque_df)
+    """
     _df = df[~df[colname].str.contains("NSF")]
     __df = df[df[colname].str.contains("NSF")]
     return _df,__df
 
 
 def associate(df,o,d):
-    """associate, a = origin_index, b = destination_index"""
+    """make the associate, 
+    df = orgin dataframe
+    o = origin index, 
+    d = destination index
+    """
     if(len(df.loc[df['associate'] == d]) == 1):
         print('this destination index', str(d) , 'already has reconciled')
     else:
@@ -75,3 +88,14 @@ matching(ledger,bank_no_nsf,"Item_sep","Description_sep")
 
 print(bank_no_nsf)
 print(ledger)
+
+bank_no_nsf = bank_no_nsf.reset_index(drop=True)
+ledger = ledger.reset_index(drop=True)
+# ledger.to_csv("ledger-test", index = False)
+# bank_no_nsf.to_csv("bank-test", index = False)
+# gui.GUI().initUI()
+sol = [0,6,1,2,None,4,None,None,None,7]
+ui = gui.GUI()
+ui.set_solution(sol)
+ui.planning_data(bank_no_nsf,ledger,sol)
+ui.initUI()
