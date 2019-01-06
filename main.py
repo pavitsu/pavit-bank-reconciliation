@@ -8,9 +8,16 @@ import warnings
 import GUI_class as gui
 warnings.filterwarnings('ignore')
 
+#Begin with request file CSV, GUI
+ui = gui.GUI()
+ui.initUploadScreen()
+ui.initUI()
+
 # Get csv data
-bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
-ledger = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
+# bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
+# ledger = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
+bank = pd.read_csv(gui.filePathBank)
+ledger = pd.read_csv(gui.filePathLedger)
 
 # Specific Which column are.... (Allow user to select)
 # ...
@@ -74,7 +81,6 @@ def matching(book,bank,colname,colname2):
                 best_row = row
         associate(bank,row2[0],best_row[0])
         print("BEST ARE ",row2[0] ,row2[1]," BY ",best_row[0], best_row[1]," SCORE= ",best_score)
-
 
 seperate_word(ledger,"Item")
 seperate_word(bank,"Description")
