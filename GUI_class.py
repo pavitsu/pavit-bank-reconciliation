@@ -14,10 +14,9 @@ from tkinter import ttk, scrolledtext, Menu, \
                     messagebox as msg, Spinbox, \
                     filedialog
 from time import  sleep         # careful - this can freeze the GUI
-global sol
-global f1Var
-global filePathBank
-global filePathLedger
+global sol,f1Var,filePathBank,\
+        filePathLedger,filePathBank, \
+        intRad, intChk
 filePathBank = ""
 filePathLedger = ""
 # bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
@@ -67,15 +66,17 @@ class GUI():
                 self.d2[__temp+"_button"].select()
                 print(__temp+"_button selected")
 
-    def interact_with_checkbox(self):
+    def InteractedRadioButton(self):
         '''GUI function used in planning_data function,
         radiobutton so it can auto disabled/active checkbox on Ledger side
         '''
         for index,target in enumerate(sol):
-            print("interacting...")
+            print("interacting...",end="")
             __str2 = "variable{0}".format(target)
             __value=self.f1Var.get()
-            print(index, ":", target)
+            global intRad
+            intRad = __value
+            print(index, ":",target,end=",")
             if __value == index:
                 try:
                     self.d2[__str2+"_button"].configure(state="active")
@@ -85,7 +86,13 @@ class GUI():
                 self.d2[__str2+"_button"].configure(state="disabled") 
             else:
                 continue
+        print()
+    
+    def InteractedCheckbox(self):
+        global intChk
 
+        pass
+        
 
     def planning_data(self,df,df2,solution):
         '''
@@ -105,7 +112,7 @@ class GUI():
         for index, row in df2.iterrows():
             __str2 = "variable{0}".format(index)
             self.d2[__str2]= tk.IntVar()
-            self.d2[__str2+"_button"] = tk.Checkbutton(self.frame2, variable=__str2)
+            self.d2[__str2+"_button"] = tk.Checkbutton(self.frame2, variable=__str2, command=self.InteractedCheckbox)
             self.d2[__str2+"_button"].grid(column=0, row=index, sticky=tk.W)
             for i in range(len(df.columns)):
                 ttk.Label(self.frame2, text=str(row[i])).grid(column=i+1, row=index)
@@ -114,7 +121,7 @@ class GUI():
         self.f1Var = tk.IntVar()
         for index, row in df.iterrows(): 
             __str = "variable{0}".format(index)
-            self.d1[__str+"_button"] = tk.Radiobutton(self.frame1, variable=self.f1Var, value = index ,command = self.interact_with_checkbox)
+            self.d1[__str+"_button"] = tk.Radiobutton(self.frame1, variable=self.f1Var, value = index ,command = self.InteractedRadioButton)
             self.d1[__str+"_button"].grid(column=0, row=index, sticky=tk.W)
             for i in range(len(df.columns)):
                 ttk.Label(self.frame1, text=str(row[i])).grid(column=i+1, row=index) 
