@@ -56,44 +56,36 @@ class GUI():
             filePathLedger = self.__filePath
             print("filePath2 = " + filePathLedger)
 
-    def NextClicked(self):
+    def nextClicked(self):
         self.win.destroy()
 
-    def selecting_button(self, solution):
-        for i in range(len(solution)):
-            if solution[i] is not None:
-                __temp = "variable{0}".format(solution[i])
-                self.d2[__temp+"_button"].select()
-                print(__temp+"_button selected")
+    def editTransaction(self):
+        def insertElement(listbox, index, value):
+            listbox.insert(index, value)
+            pass
+        t = tk.Toplevel(self.win)
+        t.wm_title("Window")
+        Lb1 = tk.Listbox(t)
+        for index, row in self.ledger.iterrows(): 
 
-    def InteractedRadioButton(self):
-        '''GUI function used in planning_data function,
-        radiobutton so it can auto disabled/active checkbox on Ledger side
-        '''
-        for index,target in enumerate(sol):
-            # print("interacting...",end="")
-            __str2 = "variable{0}".format(target)
-            __value=self.f1Var.get()
-            global intRad
-            intRad = __value
-            # print(index, ":",target,end=",")
-            if __value == index:
-                try:
-                    self.d2[__str2+"_button"].configure(state="active")
-                except KeyError as identifier:
-                    continue
-            elif target is not None:
-                self.d2[__str2+"_button"].configure(state="disabled") 
-            else:
-                continue
-        print()
-    
-    def InteractedCheckbox(self):
-        global intChk
-
-        pass
         
+        # 
+        # Lb1.insert(2, "Perl")
+        # Lb1.insert(3, "C")
+        # Lb1.insert(4, "PHP")
+        # Lb1.insert(5, "JSP")
+        # Lb1.insert(6, "Ruby")
 
+        # Lb1.pack()
+        pass
+    ####################### DELETE THIS
+    def create_window(self):
+        counter = 1
+        t = tk.Toplevel(self.win)
+        
+        l = tk.Label(t, text="This is window #%s" % counter)
+        l.pack(side="top", fill="both", expand=True, padx=100, pady=100)
+    ########################
     def planning_data(self,df,df2,solution):
         '''
         run this for GUI for after processing CSV file automated, 
@@ -107,25 +99,18 @@ class GUI():
         global d1;self.d1 = {}
         global d2;self.d2 = {}
         global sol; self.solution = solution
-        self.frame2 = ttk.LabelFrame(self.win, text="Layout 2")
-        self.frame2.grid(column=0, row=1) 
-        for index, row in df2.iterrows():
-            __str2 = "variable{0}".format(index)
-            self.d2[__str2]= tk.IntVar()
-            self.d2[__str2+"_button"] = tk.Checkbutton(self.frame2, variable=__str2, command=self.InteractedCheckbox)
-            self.d2[__str2+"_button"].grid(column=0, row=index, sticky=tk.W)
-            for i in range(len(df.columns)):
-                ttk.Label(self.frame2, text=str(row[i])).grid(column=i+1, row=index)
         self.frame1 = ttk.LabelFrame(self.win, text="Layout 1")
         self.frame1.grid(column=0, row=0)
         self.f1Var = tk.IntVar()
-        for index, row in df.iterrows(): 
+        
             __str = "variable{0}".format(index)
-            self.d1[__str+"_button"] = tk.Radiobutton(self.frame1, variable=self.f1Var, value = index ,command = self.InteractedRadioButton)
+            self.d1[__str+"_button"] = tk.Radiobutton(self.frame1, variable=self.f1Var, value = index )
             self.d1[__str+"_button"].grid(column=0, row=index, sticky=tk.W)
             for i in range(len(df.columns)):
                 ttk.Label(self.frame1, text=str(row[i])).grid(column=i+1, row=index) 
-        self.selecting_button(solution)
+
+        editButton = ttk.Button(self.win, text="Edit", command=self.editTransaction)
+        editButton.grid(column=0, row=1)
         print("Done! Planning Data!")
         pass
 
@@ -145,7 +130,7 @@ class GUI():
         self.enteredFilePath2 = tk.Label(self.frame2, width=50)
         self.enteredFilePath2.grid(column=0, row=0)
 
-        self.nextButton = ttk.Button(self.frame2, text="Next...", command=self.NextClicked)
+        self.nextButton = ttk.Button(self.frame2, text="Next...", command=self.nextClicked)
         self.nextButton.grid(column=0,row = 1)
 
         pass
