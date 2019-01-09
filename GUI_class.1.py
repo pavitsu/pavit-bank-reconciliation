@@ -5,6 +5,7 @@ Jan 2019
 #======================
 # imports
 #======================
+from BankReconciliation import BankReconciliation
 import pandas as pd
 import numpy as np
 import warnings
@@ -19,18 +20,29 @@ global sol,f1Var,filePathBank,\
         intRad, intChk
 filePathBank = ""
 filePathLedger = ""
-# bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
-result_bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-test")
-# ledger = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
-result_ledger = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-test")
+# bankDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
+# result_bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-test")
+# ledgerDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
+# result_ledger = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-test")
 #=================================================================== 
-class GUI():
-    def __init__(self):         # Initializer method
-        # Create instance
+class GUI(BankReconciliation):
+    def __init__(self):
         self.win = tk.Tk()   
-        
-        # Add a title       
-        self.win.title("Python GUI")      
+        self.win.title("Python GUI")  
+        # self.initUploadScreen()
+        # self.initUI()
+        # bankDF = pd.read_csv(filePathBank)
+        # ledgerDF = pd.read_csv(filePathLedger)
+        bankDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
+        ledgerDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
+  
+        self.reconciled = BankReconciliation(bankDF,ledgerDF)
+        # ***** Fixed Column Name Problem
+        print(self.reconciled.bankDF['associate'])
+        sol = list(self.reconciled.bankDF['associate'])
+
+        self.planning_data(self.reconciled.bankDF,self.reconciled.ledgerDF,sol)
+        self.initUI()
 
     def set_solution(self, solution):
         global sol
@@ -41,10 +53,13 @@ class GUI():
     
     def clickUpload(self):
         self.__filePath = filedialog.askopenfilename()
-        self.enteredfilePath.configure(text= self.__filePath)
-        global filePathBank
-        filePathBank = self.__filePath
-        print("filePath = " + filePathBank)
+        if self.__filePath is None:
+            return
+        else:
+            self.enteredfilePath.configure(text= self.__filePath)
+            global filePathBank
+            filePathBank = self.__filePath
+            print("filePath = " + filePathBank)
 
     def clickUpload2(self):
         self.__filePath = filedialog.askopenfilename()
@@ -60,24 +75,25 @@ class GUI():
         self.win.destroy()
 
     def editTransaction(self):
-        def insertElement(listbox, index, value):
-            listbox.insert(index, value)
-            pass
+        def saveSelection():
+            __str = lb1.curselection()
+            resultSelect.configure(text=str(__str))
+            
         t = tk.Toplevel(self.win)
         t.wm_title("Window")
-        Lb1 = tk.Listbox(t)
-        for index, row in self.ledger.iterrows(): 
-
+        lb1 = tk.Listbox(t,selectmode="EXTENDED",width=70)
+        for index, row in self.reconciled.ledgerDF.iterrows(): 
+            #Fixed Name Column Problem ****
+            lb1.insert(index,(row["Date"] ,row["Item"], row["Debit"], row["Credit"],row["Balance"]))
         
-        # 
-        # Lb1.insert(2, "Perl")
-        # Lb1.insert(3, "C")
-        # Lb1.insert(4, "PHP")
-        # Lb1.insert(5, "JSP")
-        # Lb1.insert(6, "Ruby")
-
-        # Lb1.pack()
-        pass
+        resultSelect = ttk.Label(t)
+        bt = ttk.Button(t, text="Save Selection", command=saveSelection)
+        
+        lb1.pack()
+        resultSelect.pack()
+        bt.pack()
+        self.win.mainloop()
+        
     ####################### DELETE THIS
     def create_window(self):
         counter = 1
@@ -102,7 +118,7 @@ class GUI():
         self.frame1 = ttk.LabelFrame(self.win, text="Layout 1")
         self.frame1.grid(column=0, row=0)
         self.f1Var = tk.IntVar()
-        
+        for index, row in self.reconciled.ledgerDF.iterrows():
             __str = "variable{0}".format(index)
             self.d1[__str+"_button"] = tk.Radiobutton(self.frame1, variable=self.f1Var, value = index )
             self.d1[__str+"_button"].grid(column=0, row=index, sticky=tk.W)
@@ -135,13 +151,14 @@ class GUI():
 
         pass
 
+GUI()
 
-sol = [0,6,1,2,None,4,None,None,None,7]
-ui = GUI()
+# sol = [0,6,1,2,None,4,None,None,None,7]
+# ui = GUI()
 
-# ui.initUploadScreen()
+# # ui.initUploadScreen()
+# # ui.initUI()
+
+# ui.set_solution(sol)
+# ui.planning_data(result_bank,result_ledger,sol)
 # ui.initUI()
-
-ui.set_solution(sol)
-ui.planning_data(result_bank,result_ledger,sol)
-ui.initUI()
