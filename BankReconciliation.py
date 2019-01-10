@@ -29,13 +29,17 @@ class BankReconciliation():
         bankColName = self.seperate_word(self.bankDF,"Description")
         ledgerColName = self.seperate_word(self.ledgerDF,"Item")
 
+        #Has to specific Name that contain NSF Problem
         (self.bankDF , self.onlyNSF) = self.remove_nsf(bankDF,"Description")
 
         self.bankDF = bankDF.reset_index()
         self.ledgerDF = ledgerDF.reset_index()
 
 
-        self.matching(ledgerDF,bankDF,ledgerColName,bankColName)
+        self.matching(self.ledgerDF,self.bankDF,ledgerColName,bankColName)
+
+        __list = [self.bankDF, self.onlyNSF]
+        self.bankDF = pd.concat(__list)
 
     def printBankDF(self):
         print(self.bankDF)
@@ -75,7 +79,7 @@ class BankReconciliation():
         if(len(df.loc[df['associate'] == d]) == 1):
             print('this destination index', str(d) , 'already has reconciled')
         else:
-            df['associate'][o] = d
+            df['associate'][o] = int(d)
 
     def matching(self, ledgerDF, bankDF, ledgerCol, bankCol):
         series = ledgerDF[ledgerCol]
@@ -92,28 +96,5 @@ class BankReconciliation():
             print("BEST ARE ",row2[0] ,row2[1]," BY ",best_row[0], best_row[1]," SCORE= ",best_score)
 
 
-
-
-
-
-
-
-
-# reconciled = GUI(bank,ledger)
-
-# reconciled.printBankDF()
-
-# print(reconciled.bankDF['associate'])
-
-# seperate_word(ledger,"Item")
-# seperate_word(bank,"Description")
-
-# (bank_no_nsf ,nsf_df) = remove_nsf(bank,"Description")
-
-# ledger['associate'] = pd.Series()
-# bank_no_nsf['associate'] = pd.Series()
-
-# matching(ledger,bank_no_nsf,"Item_sep","Description_sep")
-
-# print(bank_no_nsf)
-# print(ledger)
+if __name__ == "__main__":
+    print("Please, Execute code from GUI_class.py")
