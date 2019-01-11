@@ -32,15 +32,15 @@ class BankReconciliation():
         #Has to specific Name that contain NSF Problem
         (self.bankDF , self.onlyNSF) = self.remove_nsf(bankDF,"Description")
 
-        self.bankDF = bankDF.reset_index()
-        self.ledgerDF = ledgerDF.reset_index()
-
+        # self.bankDF = self.bankDF.reset_index()
+        self.ledgerDF = self.ledgerDF.reset_index()
 
         self.matching(self.ledgerDF,self.bankDF,ledgerColName,bankColName)
-
+        
+        # get NSF cheque row back & correct index
         __list = [self.bankDF, self.onlyNSF]
         self.bankDF = pd.concat(__list)
-
+        self.bankDF = self.bankDF.reset_index()
     def printBankDF(self):
         print(self.bankDF)
 

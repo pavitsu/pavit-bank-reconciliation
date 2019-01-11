@@ -22,21 +22,24 @@ global sol,f1Var,filePathBank,\
 filePathBank = ""
 filePathLedger = ""
 # bankDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
-# result_bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-test")
 # ledgerDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
+# result_bank = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-test")
 # result_ledger = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-test")
 #=================================================================== 
 class GUI(BankReconciliation):
     def __init__(self):
-        self.setupWindow()
-        self.initUploadScreen()
-        self.initUI()
-        bankDF = pd.read_csv(filePathBank)
-        ledgerDF = pd.read_csv(filePathLedger)
+        # self.setupWindow()
+        # self.initUploadScreen()
+        # self.initUI()
+        # bankDF = pd.read_csv(filePathBank)
+        # ledgerDF = pd.read_csv(filePathLedger)
+        bankDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
+        ledgerDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
         self.reconciled = BankReconciliation(bankDF,ledgerDF)
         # ***** Static Column Name Problem
         tempCol = self.reconciled.bankDF['associate']
         tempCol.fillna(-1,inplace=True)
+        # float64 has problem when it come to Save/Load file
         tempCol = tempCol.astype(np.int64)
         print(tempCol)
         sol = list(tempCol)
@@ -79,6 +82,21 @@ class GUI(BankReconciliation):
 
     def nextClicked(self):
         self.win.destroy()
+    
+    def shownMatched(self, sol, indexBank):
+        __str2 = "update{0}".format(indexBank)
+        __str3 = """"""
+        for value in sol[indexBank]:
+            row = self.reconciled.ledgerDF.iloc[value]
+            # Static Name Problem
+            __temp = str(str(row["Date"])+\
+                ","+str (row["Item"])+\
+                ","+str(row["Debit"])+\
+                ","+str(row["Credit"])+\
+                ","+str(row["Balance"]))
+            __str3 = __str3 + __temp + '\n'
+            # print(__str3)
+        d2[__str2].configure(text=str(__str3))
 
     def editTransaction(self):
         t = tk.Toplevel(self.win)
@@ -90,23 +108,7 @@ class GUI(BankReconciliation):
             resultSelect.configure(text=str(__str))
             indexBank = self.f1Var.get()
             sol[indexBank] = list(__str)
-
-            # Senting updated value to  MainPage
-            __str2 = "update{0}".format(indexBank)
-            __str3 = """"""
-            for value in sol[indexBank]:
-                row = self.reconciled.ledgerDF.iloc[value]
-                # Static Name Problem
-                __temp = str(str(row["Date"])+\
-                    ","+str (row["Item"])+\
-                    ","+str(row["Debit"])+\
-                    ","+str(row["Credit"])+\
-                    ","+str(row["Balance"]))
-                __str3 = __str3 + __temp + '\n'
-                # print(__str3)
-            
-            d2[__str2].configure(text=str(__str3))
-            print("Saved Selection", sol[indexBank], __str)
+            self.shownMatched(sol,indexBank)
             print(sol)
         tab1 = ttk.Frame(tabControl)
         tabControl.add(tab1,text="Match")
@@ -226,7 +228,17 @@ class GUI(BankReconciliation):
                 _file.close()
                 sol = ast.literal_eval(txt)
                 print("set sol = " + str(sol))
+                for index, item in enumerate(sol):
+                    __str2 = "update{0}".format(index)
+                    try:
+                        self.shownMatched(sol,index)
+                    except TypeError:
+                        d2[__str2] = ttk.Label(self.frame1)
+                        d2[__str2].grid(column=7, row=index)
+                        d2[__str2].configure(text=str(item))
+                    # except KeyError:
 
+                    #     d2[__str2].configure(text=str(item))
             
         global d1;d1 = {}
         global d2;d2 = {}
