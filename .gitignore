@@ -1,8 +1,14 @@
 
-__pycache__/main.cpython-36.pyc
-.vscode/settings.json
-.pydevproject
-.project
+.metadata/.lock
+.metadata/.log
+.metadata/.mylyn/.taskListIndex/segments_1
+.metadata/.mylyn/.taskListIndex/write.lock
+.metadata/.mylyn/repositories.xml.zip
+.metadata/.mylyn/tasks.xml.zip
+.metadata/.plugins/org.eclipse.core.resources/.root/.indexes/history.version
+.metadata/.plugins/org.eclipse.core.resources/.root/.indexes/properties.index
+.metadata/.plugins/org.eclipse.core.resources/.root/.indexes/properties.version
+.metadata/.plugins/org.eclipse.core.resources/.root/1.tree
 .metadata/version.ini
 .metadata/.plugins/org.python.pydev/pyunit_tests/test_run_pin_info.txt
 .metadata/.plugins/org.eclipse.ui.workbench/workingsets.xml
@@ -33,13 +39,8 @@ __pycache__/main.cpython-36.pyc
 .metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.jdt.ui.prefs
 .metadata/.plugins/org.eclipse.core.runtime/.settings/org.eclipse.core.resources.prefs
 .metadata/.plugins/org.eclipse.core.resources/.safetable/org.eclipse.core.resources
-.metadata/.plugins/org.eclipse.core.resources/.root/1.tree
-.metadata/.plugins/org.eclipse.core.resources/.root/.indexes/properties.version
-.metadata/.plugins/org.eclipse.core.resources/.root/.indexes/properties.index
-.metadata/.plugins/org.eclipse.core.resources/.root/.indexes/history.version
-.metadata/.mylyn/tasks.xml.zip
-.metadata/.mylyn/repositories.xml.zip
-.metadata/.mylyn/.taskListIndex/write.lock
-.metadata/.mylyn/.taskListIndex/segments_1
-.metadata/.log
-.metadata/.lock
+.project
+.pydevproject
+.vscode/settings.json
+__pycache__/main.cpython-36.pyc
+*.pyc
