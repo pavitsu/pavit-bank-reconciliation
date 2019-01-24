@@ -6,7 +6,6 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, Menu, \
                     messagebox as msg, Spinbox, \
                     filedialog
-from time import  sleep         # careful - this can freeze the GUI
 global sol,f1Var,filePathBank,\
         filePathLedger,filePathBank, \
         intRad, intChk
@@ -14,7 +13,7 @@ filePathBank = ""
 filePathLedger = ""
 
 class BankReconciliation():
-    def __init__(self,bankDF,ledgerDF):
+    def __init__(self, bankDF, ledgerDF):
         self.bankDF = bankDF
         self.ledgerDF = ledgerDF
         self.solution = {}
@@ -41,6 +40,7 @@ class BankReconciliation():
         __list = [self.bankDF, self.onlyNSF]
         self.bankDF = pd.concat(__list)
         self.bankDF = self.bankDF.reset_index()
+
     def printBankDF(self):
         print(self.bankDF)
 
@@ -93,7 +93,7 @@ class BankReconciliation():
                     best_score = cur_score
                     best_row = row
             self.associate(self.bankDF,row2[0],best_row[0])
-            print("BEST ARE ",row2[0] ,row2[1]," BY ",best_row[0], best_row[1]," SCORE= ",best_score)
+            print("BEST ARE ", row2[0],''.join(row2[1]) ," BY ", best_row[0],''.join(best_row[1])," SCORE= ",best_score)
 
 
 if __name__ == "__main__":

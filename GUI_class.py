@@ -10,15 +10,18 @@ import ast
 import pandas as pd
 import numpy as np
 import warnings
+from math import isnan
 warnings.filterwarnings('ignore')
 import tkinter as tk
 from tkinter import ttk, scrolledtext, Menu, \
                     messagebox as msg, Spinbox, \
-                    filedialog, MULTIPLE, EXTENDED
+                    filedialog, MULTIPLE, EXTENDED, \
+                    Scrollbar
 from time import  sleep         # careful - this can freeze the GUI
 global sol,f1Var,filePathBank,\
         filePathLedger,filePathBank, \
-        intRad, intChk
+        intRad, intChk, listDescIndex, \
+        listItemIndex
 filePathBank = ""
 filePathLedger = ""
 # bankDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
@@ -28,13 +31,42 @@ filePathLedger = ""
 #=================================================================== 
 class GUI(BankReconciliation):
     def __init__(self):
-        # self.setupWindow()
-        # self.initUploadScreen()
-        # self.initUI()
-        # bankDF = pd.read_csv(filePathBank)
-        # ledgerDF = pd.read_csv(filePathLedger)
-        bankDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/bank-v2.csv")
-        ledgerDF = pd.read_csv("~/Documents/GitHub/senior-bank-reconcile/example-data/ledger-v2.csv")
+        self.setupWindow()
+        self.initUploadScreen()
+        self.initUI()
+        bankDF = pd.read_csv(filePathBank)
+        ledgerDF = pd.read_csv(filePathLedger)
+
+        self.setupWindow()
+        self.selectTranformUI(bankDF, "Date")
+
+        self.setupWindow()
+        self.selectTranformUI(ledgerDF, "Date")
+
+        self.setupWindow()
+        self.selectStrColScreen(bankDF, "Description")
+        
+        self.setupWindow()
+        self.selectStrColScreen(ledgerDF, "Item")
+
+        self.setupWindow()
+        self.selectTranformUI(bankDF, "Withdrawals")
+
+        self.setupWindow()
+        self.selectTranformUI(ledgerDF, "Debit")
+
+        self.setupWindow()
+        self.selectTranformUI(bankDF, "Deposits")
+
+        self.setupWindow()
+        self.selectTranformUI(ledgerDF, "Credit")
+
+        self.setupWindow()
+        self.selectTranformUI(bankDF, "Balance")
+
+        self.setupWindow()
+        self.selectTranformUI(ledgerDF, "Balance")
+
         self.reconciled = BankReconciliation(bankDF,ledgerDF)
         # ***** Static Column Name Problem
         tempCol = self.reconciled.bankDF['associate']
@@ -57,9 +89,65 @@ class GUI(BankReconciliation):
         global sol
         sol = solution
 
+
+    def selectTranformUI(self, df, date_col):
+        '''Selecting Date Column'''
+        ttk.Label(self.win, text = "Selecting "+str(date_col)+" Column").pack()
+        def transformDate(df, index, output_col):
+            df.rename(columns={df.columns[index]: output_col}, inplace=True)
+            print("Renamed Columns")
+            pass
+        def selectCol():
+            global indexSelected
+            indexSelected = lb1.curselection()
+            indexSelected = indexSelected[0]
+            print("Selected index for "+str(date_col)+": "+str(indexSelected))
+            transformDate(df, indexSelected, date_col)
+            self.win.destroy()
+            pass
+        index = 0
+        lb1 = tk.Listbox(self.win,width=70)
+        for column in df: 
+            lb1.insert(index, column)
+            index += 1
+        ttk.Button(self.win, text="Next", command=selectCol).pack()
+        lb1.pack()
+        self.win.mainloop()
+        
     def initUI(self):
         self.win.mainloop()
-    
+
+    def selectStrColScreen(self, df, output_col):
+        '''Selecting and Combining to produce output_col'''
+        ttk.Label(self.win, text = "Selecting and Combining string " + str(output_col)).pack()
+        def combineCol(df, list_index, output_col):
+            df[output_col] = ""
+            for index in list_index:
+                # df[output_col]= df[output_col].map(str) + ',' + df.iloc[:, index]
+                df[output_col]= df[output_col].map(str) + df.iloc[:, index]
+            print("done! combined"+str(list_index)+str(output_col))
+            df[output_col] = df[output_col].astype('object')
+            pass
+        def selectCol():
+            global listIndex
+            __str = lb1.curselection()
+            listIndex = list(__str)
+            print(listIndex)
+            for i in listIndex:
+                df.iloc[:, i].fillna(value="", inplace=True)
+            print("Done fillna with ''")            
+            combineCol(df, listIndex, output_col)
+            self.win.destroy()
+            pass
+        index = 0
+        lb1 = tk.Listbox(self.win,selectmode=MULTIPLE,width=70)
+        for column in df: 
+            lb1.insert(index, column)
+            index += 1
+        ttk.Button(self.win, text="Next", command=selectCol).pack()
+        lb1.pack()
+        self.win.mainloop()
+
     def clickUpload(self):
         self.__filePath = filedialog.askopenfilename()
         if self.__filePath is None:
@@ -97,6 +185,26 @@ class GUI(BankReconciliation):
             __str3 = __str3 + __temp + '\n'
             # print(__str3)
         d2[__str2].configure(text=str(__str3))
+
+    def shownFirstMatch(self, series_sol):
+        indexBank = 0
+        for value in series_sol:
+            __str2 = "update{0}".format(indexBank)
+            __str3 = """"""
+            if str(int(value)) == "-1":
+                print('-1 value found skipped this index' + str(indexBank))
+            else:
+                row = self.reconciled.ledgerDF.iloc[int(value)]
+                # Static Name Problem
+                __temp = str(str(row["Date"])+\
+                    ","+str (row["Item"])+\
+                    ","+str(row["Debit"])+\
+                    ","+str(row["Credit"])+\
+                    ","+str(row["Balance"]))
+                __str3 = __str3 + __temp + '\n'
+                print('inserted row solution from ledger index' + str(value))
+            indexBank += 1
+            d2[__str2].configure(text=str(__str3))
 
     def editTransaction(self):
         t = tk.Toplevel(self.win)
@@ -236,9 +344,6 @@ class GUI(BankReconciliation):
                         d2[__str2] = ttk.Label(self.frame1)
                         d2[__str2].grid(column=7, row=index)
                         d2[__str2].configure(text=str(item))
-                    # except KeyError:
-
-                    #     d2[__str2].configure(text=str(item))
             
         global d1;d1 = {}
         global d2;d2 = {}
@@ -266,6 +371,7 @@ class GUI(BankReconciliation):
         saveButton.grid(column=0, row=2)
         loadButton = ttk.Button(self.win, text="Load File...",command=loadFromFile)
         loadButton.grid(column=0, row=3)
+        # self.shownFirstMatch(self.reconciled.bankDF['associate'])
         print("Done! Planning Data!")
         pass
 
