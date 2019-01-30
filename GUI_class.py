@@ -220,11 +220,12 @@ class GUI(BankReconciliation):
             print(sol)
         tab1 = ttk.Frame(tabControl)
         tabControl.add(tab1,text="Match")
-        lb1 = tk.Listbox(tab1,selectmode=MULTIPLE,width=70)
+        lb1 = tk.Listbox(tab1,selectmode=MULTIPLE,width=120)
         for index, row in self.reconciled.ledgerDF.iterrows(): 
             # Static Name Column Problem ****
             lb1.insert(index,\
-                (row["Date"]\
+                (str(index)\
+                ,row["Date"]\
                 ,row["Item"]\
                 ,row["Debit"]\
                 ,row["Credit"]\
