@@ -58,8 +58,6 @@ Selecting Balance Ledger Column with
 
 * Balance
 
-
-
 ## Authors
 
 * **Pavit Suwansiri** - *Initial work* - [pavitsu](https://github.com/pavitsu)
