@@ -44,3 +44,4 @@
 .vscode/settings.json
 __pycache__/main.cpython-36.pyc
 *.pyc
+.DS_Store

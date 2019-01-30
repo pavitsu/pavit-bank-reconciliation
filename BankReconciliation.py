@@ -6,7 +6,6 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, Menu, \
                     messagebox as msg, Spinbox, \
                     filedialog
-from time import  sleep         # careful - this can freeze the GUI
 global sol,f1Var,filePathBank,\
         filePathLedger,filePathBank, \
         intRad, intChk
@@ -14,7 +13,7 @@ filePathBank = ""
 filePathLedger = ""
 
 class BankReconciliation():
-    def __init__(self,bankDF,ledgerDF):
+    def __init__(self, bankDF, ledgerDF):
         self.bankDF = bankDF
         self.ledgerDF = ledgerDF
         self.solution = {}
@@ -35,12 +34,15 @@ class BankReconciliation():
         # self.bankDF = self.bankDF.reset_index()
         self.ledgerDF = self.ledgerDF.reset_index()
 
+        self.check_number(self.ledgerDF, self.bankDF)
+
         self.matching(self.ledgerDF,self.bankDF,ledgerColName,bankColName)
         
         # get NSF cheque row back & correct index
         __list = [self.bankDF, self.onlyNSF]
         self.bankDF = pd.concat(__list)
         self.bankDF = self.bankDF.reset_index()
+
     def printBankDF(self):
         print(self.bankDF)
 
@@ -76,8 +78,12 @@ class BankReconciliation():
 
     def associate(self, df, o, d):
         """associate, a = origin_index, b = destination_index"""
-        if(len(df.loc[df['associate'] == d]) == 1):
-            print('this destination index', str(d) , 'already has reconciled')
+        # Check if that original already has value?
+        if (pd.isnull(df['associate'][o]) == False):
+            print(' original index', str(o) , 'already has reconciled')
+        # Check If destination index already used or not?
+        elif(len(df.loc[df['associate'] == d]) == 1):
+            print(' destination index', str(d) , 'already has reconciled')
         else:
             df['associate'][o] = int(d)
 
@@ -93,8 +99,19 @@ class BankReconciliation():
                     best_score = cur_score
                     best_row = row
             self.associate(self.bankDF,row2[0],best_row[0])
-            print("BEST ARE ",row2[0] ,row2[1]," BY ",best_row[0], best_row[1]," SCORE= ",best_score)
-
+            print("BEST ARE ", row2[0],''.join(row2[1]) ," BY ", best_row[0],''.join(best_row[1])," SCORE= ",best_score)
+    
+    def check_number(self, ledgerDF, bankDF):
+        for indexBank, rowBank in bankDF.iterrows():
+            for indexLedger, rowLedger in ledgerDF.iterrows():
+                boolDate = rowBank['Date'] == rowLedger['Date']
+                boolMoneyIn = str(rowBank['Deposits']) == str(rowLedger['Debit'])
+                boolMoneyOut = str(rowBank['Withdrawals']) == str(rowLedger['Credit'])
+                if( boolDate and boolMoneyIn  and boolMoneyOut ):
+                    print("compare by date, money.. "+ str(indexBank) \
+                        +" equal to " + str(indexLedger))
+                    self.associate(self.bankDF,indexBank,indexLedger)
+                    break
 
 if __name__ == "__main__":
     print("Please, Execute code from GUI_class.py")
