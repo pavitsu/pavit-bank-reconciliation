@@ -53,13 +53,13 @@ class GUI(BankReconciliation):
         self.selectTranformUI(bankDF, "Withdrawals")
 
         self.setupWindow()
-        self.selectTranformUI(ledgerDF, "Debit")
-
-        self.setupWindow()
         self.selectTranformUI(bankDF, "Deposits")
 
         self.setupWindow()
         self.selectTranformUI(ledgerDF, "Credit")
+
+        self.setupWindow()
+        self.selectTranformUI(ledgerDF, "Debit")
 
         self.setupWindow()
         self.selectTranformUI(bankDF, "Balance")
@@ -91,7 +91,7 @@ class GUI(BankReconciliation):
 
 
     def selectTranformUI(self, df, date_col):
-        '''Selecting Date Column'''
+        '''Select and transform column name'''
         ttk.Label(self.win, text = "Selecting "+str(date_col)+" Column").pack()
         def transformDate(df, index, output_col):
             df.rename(columns={df.columns[index]: output_col}, inplace=True)
