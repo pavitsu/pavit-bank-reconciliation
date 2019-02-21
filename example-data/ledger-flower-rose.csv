@@ -1,4 +1,4 @@
-Date,Details,Ref,Account,Money In,Money Out,Bank Balance
+Date,Item,Ref,Account,Debit,Credit,Bank Balance
 1-Apr-12, Personal funds deposited,Transfer in,Capital,500.00,,500.00
 1-Apr-12, Loan from AMB,Loan,Bank Loan,"1,500.00",,"2,000.00"
 1-Apr-12,The City Express - Shop Assistant,Ch 0001,Advertising,,125.00,"1,875.00"
