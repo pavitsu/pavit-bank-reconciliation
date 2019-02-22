@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 import warnings
 from pandas import isnull
+from datetime import date, timedelta
 warnings.filterwarnings('ignore')
 
 class BankReconciliation():
-    def __init__(self, listBankDF, listLedgerDF, normalCheck = False, nameCheck = False):
+    def __init__(self, listBankDF, listLedgerDF, normalCheck = False, nameCheck = False, errAmount = 0, errDay = 0):
 
         for (index,df) in enumerate(listBankDF):
             df['Bank_Entity'] = str(index)
@@ -38,7 +39,7 @@ class BankReconciliation():
         # self.bankDF = self.bankDF.reset_index()
         self.ledgerDF = self.ledgerDF.reset_index()
 
-        if (normalCheck): self.check_number(self.ledgerDF, self.bankDF)
+        if (normalCheck): self.check_number(self.ledgerDF, self.bankDF, errAmount, errDay)
         if (nameCheck): self.matching(self.ledgerDF,self.bankDF,ledgerColName,bankColName)
         
         # get NSF cheque row back & correct index
@@ -82,7 +83,7 @@ class BankReconciliation():
     def associate(self, df, o, d):
         """associate, a = origin_index, b = destination_index"""
         # Check if that original already has value?
-        # print(df['associate'][o])
+        isAssign = False
         if (not (isnull(df['associate'][o]))):
             print(' original index', str(o) , 'already has reconciled')
         # Check If destination index already used or not?
@@ -90,6 +91,8 @@ class BankReconciliation():
             print(' destination index', str(d) , 'already has reconciled')
         else:
             df['associate'][o] = int(d)
+            isAssign = True
+        return isAssign
 
     def matching(self, ledgerDF, bankDF, ledgerCol, bankCol):
         print("Doing name item check....")
@@ -106,42 +109,57 @@ class BankReconciliation():
             self.associate(self.bankDF,row2[0],best_row[0])
             print("BEST ARE ", row2[0],''.join(row2[1]) ," BY ", best_row[0],''.join(best_row[1])," SCORE= ",best_score)
     
-    def check_number(self, ledgerDF, bankDF):
-        #######
-        # print(bankDF)
-        # print("Doing normal check....")
-        # print(ledgerDF)
-        #######
+    def check_number(self, ledgerDF, bankDF, errAmount, errDay):
         for indexBank, rowBank in bankDF.iterrows():
             for indexLedger, rowLedger in ledgerDF.iterrows():
-                boolDate = rowBank['Date'] == rowLedger['Date']
+                boolDate = rowBank['Date'].date() == rowLedger['Date'].date()
                 rowDeposit = float(str(rowBank['Deposits']).replace(',',''))
                 rowDebit = float(str(rowLedger['Debit']).replace(',',''))
                 rowWithdrawals = float(str(rowBank['Withdrawals']).replace(',',''))
                 rowCredit = float(str(rowLedger['Credit']).replace(',',''))
+
                 if(isnull(rowDeposit) & isnull(rowDebit)):
-                    boolMoneyIn =True
-                else:boolMoneyIn = rowDeposit == rowDebit 
-                if(isnull(rowWithdrawals) & isnull(rowCredit)):
+                    boolMoneyIn = True
+                elif( rowDeposit == rowDebit ):
+                    boolMoneyIn = True
+                elif( rowDeposit - errAmount <= rowDebit <= rowDeposit + errAmount):
+                    boolMoneyIn = True
+                else : boolMoneyIn = False
+
+                if( isnull(rowWithdrawals) & isnull(rowCredit) ):
                     boolMoneyOut = True
-                else: boolMoneyOut = rowWithdrawals == rowCredit 
-                ######
-                # print(boolDate,rowBank['Date'] , rowLedger['Date'])
-                # print(boolMoneyIn,float(str(rowBank['Deposits']).replace(',','')), float(str(rowLedger['Debit']).replace(',','')))
-                # print(boolMoneyOut,float(str(rowBank['Withdrawals']).replace(',','')),float(str(rowLedger['Credit']).replace(',','')))
-                ######
+                elif( rowWithdrawals == rowCredit ):
+                    boolMoneyOut = True
+                elif( rowWithdrawals - errAmount <= rowCredit <=  rowWithdrawals + errAmount ):
+                    boolMoneyOut = True
+                else : boolMoneyOut = False
+
+                if(errDay > 0 & (not boolDate)):
+                    bankDate = rowBank['Date'].date()
+                    ledgerDate = rowLedger['Date'].date()
+                    margin = timedelta(days = errDay)
+                    boolDate = bankDate - margin <=  ledgerDate <= bankDate + margin
+
+                # print(boolDate , rowBank['Date'].date(), rowLedger['Date'].date())
+                # print(boolMoneyIn, rowDeposit , rowDebit)
+                # print(boolMoneyOut, rowWithdrawals, rowCredit)
+
                 if( boolDate and boolMoneyIn  and boolMoneyOut ):
                     print("compare by date, money.. "+ str(indexBank) \
                         +" equal to " + str(indexLedger))
-                    self.associate(self.bankDF,indexBank,indexLedger)
-                    break
+                    isAssign = self.associate(self.bankDF,indexBank,indexLedger)
+                    if isAssign : break
+                    else : continue
                 # else:print("not match")
+        
+
 
 if __name__ == "__main__":
     pass
     # print("Please, Execute code from GUI_class.py")
     # bankDF = pd.read_csv("/Users/pavitsu/Documents/GitHub/senior-bank-reconcile/example-data/bank-flower-rose.csv")
     # bankDF2 = pd.read_csv("/Users/pavitsu/Documents/GitHub/senior-bank-reconcile/example-data/bank2-flower-rose.csv")
+    # errBankDF2 = pd.read_csv("/Users/pavitsu/Documents/GitHub/senior-bank-reconcile/example-data/err_bank2-flower-rose.csv")
     # ledgerDF = pd.read_csv("/Users/pavitsu/Documents/GitHub/senior-bank-reconcile/example-data/ledger-flower-rose.csv")
-    # ledgerDF2 = pd.read_csv("/Users/pavitsu/Documents/GitHub/senior-bank-reconcile/example-data/ledger-flower-rose.csv")
-    # auto = BankReconciliation([bankDF,bankDF2],[ledgerDF,ledgerDF2], normalCheck = True, nameCheck = True)
+    # ledgerDF2 = pd.read_csv("/Users/pavitsu/Documents/GitHub/senior-bank-reconcile/example-data/ledger2-flower-rose.csv")
+    # auto = BankReconciliation([bankDF,errBankDF2],[ledgerDF,ledgerDF2], normalCheck = True, nameCheck = True, errAmount= 100, errDay=7)
